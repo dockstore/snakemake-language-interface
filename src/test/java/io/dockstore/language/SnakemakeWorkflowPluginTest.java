@@ -3,8 +3,8 @@ package io.dockstore.language;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
+import io.dockstore.language.MinimalLanguageInterface.WorkflowMetadata;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -27,6 +27,9 @@ public class SnakemakeWorkflowPluginTest {
         final String contents = reader.readFile(initialPath);
         final Map<String, MinimalLanguageInterface.FileMetadata> fileMap =
             plugin.indexWorkflowFiles(initialPath, contents, reader);
+
+        // TODO parse some actual information
+        plugin.parseWorkflowForMetadata(initialPath, contents, fileMap);
 
         assertFalse(fileMap.isEmpty());
         assertTrue(fileMap.containsKey("README.md"));

@@ -80,7 +80,7 @@ public class SnakemakeWorkflowPlugin extends Plugin {
 
         @Override
         public Pattern initialPathPattern() {
-            return Pattern.compile("/.*\\.swl");
+            return Pattern.compile("\\.snakemake-workflow-catalog\\.yml");
         }
 
         @Override
@@ -154,7 +154,7 @@ public class SnakemakeWorkflowPlugin extends Plugin {
         @Override
         public WorkflowMetadata parseWorkflowForMetadata(String initialPath, String contents, Map<String, FileMetadata> indexedFiles) {
             WorkflowMetadata metadata = new WorkflowMetadata();
-            // TODO: grab real metadata, this is carried over from SWL
+            // TODO: grab real metadata, this is carried over from SWL and is non-functional
             for (String line : contents.split("\\r?\\n")) {
                 if (line.startsWith("author")) {
                     final String[] s = line.split(":");
