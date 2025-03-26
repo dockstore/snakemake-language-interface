@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 OICR
+ *    Copyright 2025 OICR and UCSC
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -120,11 +120,14 @@ public class SnakemakeWorkflowPlugin extends Plugin {
             processFolder(initialPath, "workflow/envs", reader, results);
             processFolder(initialPath, "workflow/report", reader, results);
             processFolder(initialPath, "workflow/rules", reader, results);
+            // TODO see comment in https://github.com/dockstore/snakemake-language-interface/pull/2#discussion_r2014758910
+            // the schemas directory may be optional and potentially added by a `validate` call, investigate
             processFolder(initialPath, "workflow/schemas", reader, results);
             processFolder(initialPath, "workflow/scripts", reader, results);
             processFolder(initialPath, "workflow/notebooks", reader, results);
         }
 
+        // TODO determine how to process non-descriptor content https://ucsc-cgl.atlassian.net/browse/DOCK-262
         private void processFolder(String initialPath, String folder, FileReader reader, Map<String, FileMetadata> results) {
             List<String> files = findFiles(initialPath, folder, reader);
             for (String file : files) {
@@ -139,15 +142,15 @@ public class SnakemakeWorkflowPlugin extends Plugin {
             final int extensionPos = initialPath.lastIndexOf("/");
             final String base = initialPath.substring(0, extensionPos);
 
-            final Path rules = folderToCheck == null ? Paths.get(base) : Paths.get(base, folderToCheck);
+            final Path pathsInDir = folderToCheck == null ? Paths.get(base) : Paths.get(base, folderToCheck);
             // listing files is more rate limit friendly (e.g. GitHub counts each 404 "miss" as an API
             // call,
             // but listing a directory can be free if previously requested/cached)
-            List<String> strings = reader.listFiles(rules.toString());
-            if (strings == null) {
+            List<String> filennamesInDir = reader.listFiles(pathsInDir.toString());
+            if (filennamesInDir == null) {
                 return Lists.newArrayList();
             }
-            final Set<String> filenameSet = Sets.newHashSet(strings);
+            final Set<String> filenameSet = Sets.newHashSet(filennamesInDir);
             return filenameSet.stream().map(s ->  (folderToCheck == null ? "" : folderToCheck + "/") + s).toList();
         }
 

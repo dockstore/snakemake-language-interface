@@ -4,7 +4,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.io.Resources;
-import io.dockstore.language.MinimalLanguageInterface.WorkflowMetadata;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -51,7 +50,6 @@ public class SnakemakeWorkflowPluginTest {
         // assertTrue(fileMap.containsKey(".test/config_basic/config.yaml"));
         assertTrue(fileMap.containsKey("LICENSE"));
         assertTrue(fileMap.get("LICENSE").content().contains("The above copyright notice and this permission notice shall be included in all"));
-        assertTrue(fileMap.containsKey("LICENSE"));
         assertTrue(fileMap.get("workflow/rules/align.smk").content().contains("3.5.3/bio/star/align"));
     }
 
