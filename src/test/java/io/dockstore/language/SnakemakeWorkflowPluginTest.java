@@ -1,9 +1,12 @@
 package io.dockstore.language;
 
+import static io.dockstore.language.SnakemakeWorkflowPlugin.SNAKEMAKE_WORKFLOW_CATALOG_YML;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import com.google.common.io.Resources;
+import io.dockstore.common.VersionTypeValidation;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -18,11 +21,16 @@ import org.junit.Test;
 public class SnakemakeWorkflowPluginTest {
 
     @Test
-    public void testWorkflowParsingHelloWorld() {
+    public void testWorkflowParsingHelloWorldWithoutCatalog() {
+        VersionTypeValidation versionTypeValidation = attemptValidation("nathanhaigh/snakemake-hello-world", false);
+        assertFalse(versionTypeValidation.isValid());
+    }
+
+    private static VersionTypeValidation attemptValidation(String repoName, boolean isCatalogPresent) {
         final SnakemakeWorkflowPlugin.SnakemakeWorkflowPluginImpl plugin =
             new SnakemakeWorkflowPlugin.SnakemakeWorkflowPluginImpl();
-        final ResourceFileReader reader = new ResourceFileReader("nathanhaigh/snakemake-hello-world");
-        final String initialPath = "/.snakemake-workflow-catalog.yml";
+        final ResourceFileReader reader = new ResourceFileReader(repoName);
+        final String initialPath = "/workflow/Snakefile";
         final String contents = reader.readFile(initialPath);
         final Map<String, MinimalLanguageInterface.FileMetadata> fileMap =
             plugin.indexWorkflowFiles(initialPath, contents, reader);
@@ -31,7 +39,15 @@ public class SnakemakeWorkflowPluginTest {
         plugin.parseWorkflowForMetadata(initialPath, contents, fileMap);
 
         assertFalse(fileMap.isEmpty());
+        assertEquals(fileMap.containsKey(SNAKEMAKE_WORKFLOW_CATALOG_YML), isCatalogPresent);
         assertTrue(fileMap.containsKey("README.md"));
+        return plugin.validateWorkflowSet(initialPath, contents, fileMap);
+    }
+
+    @Test
+    public void testWorkflowParsingHelloWorld() {
+        VersionTypeValidation versionTypeValidation = attemptValidation("nathanhaigh/snakemake-hello-world-with-catalog", true);
+        assertTrue(versionTypeValidation.isValid());
     }
 
     @Test
@@ -39,7 +55,7 @@ public class SnakemakeWorkflowPluginTest {
         final SnakemakeWorkflowPlugin.SnakemakeWorkflowPluginImpl plugin =
             new SnakemakeWorkflowPlugin.SnakemakeWorkflowPluginImpl();
         final ResourceFileReader reader = new ResourceFileReader("snakemake-workflows/rna-seq-star-deseq2");
-        final String initialPath = "/.snakemake-workflow-catalog.yml";
+        final String initialPath = "/workflow/Snakefile";
         final String contents = reader.readFile(initialPath);
         final Map<String, MinimalLanguageInterface.FileMetadata> fileMap =
             plugin.indexWorkflowFiles(initialPath, contents, reader);
@@ -51,6 +67,7 @@ public class SnakemakeWorkflowPluginTest {
         assertTrue(fileMap.containsKey("LICENSE"));
         assertTrue(fileMap.get("LICENSE").content().contains("The above copyright notice and this permission notice shall be included in all"));
         assertTrue(fileMap.get("workflow/rules/align.smk").content().contains("3.5.3/bio/star/align"));
+        assertTrue(plugin.validateWorkflowSet(initialPath, contents,fileMap).isValid());
     }
 
     abstract static class URLFileReader implements MinimalLanguageInterface.FileReader {

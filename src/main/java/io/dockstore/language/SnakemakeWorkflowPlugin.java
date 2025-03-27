@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 public class SnakemakeWorkflowPlugin extends Plugin {
 
     public static final Logger LOG = LoggerFactory.getLogger(SnakemakeWorkflowPlugin.class);
+    public static final String SNAKEMAKE_WORKFLOW_CATALOG_YML = ".snakemake-workflow-catalog.yml";
 
 
     /**
@@ -62,7 +63,7 @@ public class SnakemakeWorkflowPlugin extends Plugin {
 
         @Override
         public VersionTypeValidation validateWorkflowSet(String initialPath, String contents, Map<String, FileMetadata> indexedFiles) {
-            VersionTypeValidation validation = new VersionTypeValidation(true, new HashMap<>());
+            VersionTypeValidation validation = new VersionTypeValidation(indexedFiles.containsKey(SNAKEMAKE_WORKFLOW_CATALOG_YML), new HashMap<>());
             // TODO hook up some real validation
             return validation;
         }
@@ -78,33 +79,38 @@ public class SnakemakeWorkflowPlugin extends Plugin {
             return DescriptorLanguage.SMK;
         }
 
+        /**
+         * TODO: non-standardized Snakemake files can technically have their Snakefile in the root, supporting this probably
+         * affects some assumptions about folder structure below https://github.com/snakemake/snakemake-workflow-catalog?tab=readme-ov-file#standardized-usage-workflows
+         * @return
+         */
         @Override
         public Pattern initialPathPattern() {
-            return Pattern.compile("\\.snakemake-workflow-catalog\\.yml");
+            return Pattern.compile("workflow/Snakefile");
         }
 
         @Override
         public Map<String, FileMetadata> indexWorkflowFiles(String initialPath, String contents, FileReader reader) {
             Map<String, FileMetadata> results = new HashMap<>();
-            // start with the catalog, some notes on workflow structure at https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html
+            // start with the workflow/Snakemake, some notes on workflow structure at https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html
             results.put(
                 initialPath,
                 //TODO: get real snakemake version number, if they have one
                 new FileMetadata(contents, GenericFileType.IMPORTED_DESCRIPTOR, "1.0"));
             // there can be  licenses, readme files and other useful stuff in the root
-            processFolder(initialPath, null, reader, results);
+            processFolder("/", null, reader, results);
 
 
             // Snakefile might be in same directory as catalog file or up in a workflow directory (a workflow directory will have other folders), is not named in the catalog file
-            processFolder(initialPath, "workflow", reader, results);
-            if (results.containsKey("workflow/Snakefile")) {
-                processWorkflowFolders(initialPath, reader, results);
+            processFolder(initialPath, "/workflow", reader, results);
+            if (results.containsKey("/workflow/Snakefile")) {
+                processWorkflowFolders(reader, results);
             }
             // sometimes there is a config folder
-            processFolder(initialPath, "config", reader, results);
+            processFolder(initialPath, "/config", reader, results);
             // there are results and resources folders, developers are encouraged to keep the latter small
             // processFolder(initialPath, "results", reader, results);
-            processFolder(initialPath, "resources", reader, results);
+            processFolder(initialPath, "/resources", reader, results);
 
             /// TODO modules support
 
@@ -116,15 +122,15 @@ public class SnakemakeWorkflowPlugin extends Plugin {
             return results;
         }
 
-        private void processWorkflowFolders(String initialPath, FileReader reader, Map<String, FileMetadata> results) {
-            processFolder(initialPath, "workflow/envs", reader, results);
-            processFolder(initialPath, "workflow/report", reader, results);
-            processFolder(initialPath, "workflow/rules", reader, results);
+        private void processWorkflowFolders(FileReader reader, Map<String, FileMetadata> results) {
+            processFolder("/workflow", "workflow/envs", reader, results);
+            processFolder("/workflow", "workflow/report", reader, results);
+            processFolder("/workflow", "workflow/rules", reader, results);
             // TODO see comment in https://github.com/dockstore/snakemake-language-interface/pull/2#discussion_r2014758910
             // the schemas directory may be optional and potentially added by a `validate` call, investigate
-            processFolder(initialPath, "workflow/schemas", reader, results);
-            processFolder(initialPath, "workflow/scripts", reader, results);
-            processFolder(initialPath, "workflow/notebooks", reader, results);
+            processFolder("/workflow", "workflow/schemas", reader, results);
+            processFolder("/workflow", "workflow/scripts", reader, results);
+            processFolder("/workflow", "workflow/notebooks", reader, results);
         }
 
         // TODO determine how to process non-descriptor content https://ucsc-cgl.atlassian.net/browse/DOCK-262
