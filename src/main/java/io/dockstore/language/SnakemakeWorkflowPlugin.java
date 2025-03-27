@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 public class SnakemakeWorkflowPlugin extends Plugin {
 
     public static final Logger LOG = LoggerFactory.getLogger(SnakemakeWorkflowPlugin.class);
-    public static final String SNAKEMAKE_WORKFLOW_CATALOG_YML = ".snakemake-workflow-catalog.yml";
+    public static final String SNAKEMAKE_WORKFLOW_CATALOG_YML = "/.snakemake-workflow-catalog.yml";
 
 
     /**
@@ -123,14 +123,14 @@ public class SnakemakeWorkflowPlugin extends Plugin {
         }
 
         private void processWorkflowFolders(FileReader reader, Map<String, FileMetadata> results) {
-            processFolder("/workflow", "workflow/envs", reader, results);
-            processFolder("/workflow", "workflow/report", reader, results);
-            processFolder("/workflow", "workflow/rules", reader, results);
+            processFolder("/workflow", "/workflow/envs", reader, results);
+            processFolder("/workflow", "/workflow/report", reader, results);
+            processFolder("/workflow", "/workflow/rules", reader, results);
             // TODO see comment in https://github.com/dockstore/snakemake-language-interface/pull/2#discussion_r2014758910
             // the schemas directory may be optional and potentially added by a `validate` call, investigate
-            processFolder("/workflow", "workflow/schemas", reader, results);
-            processFolder("/workflow", "workflow/scripts", reader, results);
-            processFolder("/workflow", "workflow/notebooks", reader, results);
+            processFolder("/workflow", "/workflow/schemas", reader, results);
+            processFolder("/workflow", "/workflow/scripts", reader, results);
+            processFolder("/workflow", "/workflow/notebooks", reader, results);
         }
 
         // TODO determine how to process non-descriptor content https://ucsc-cgl.atlassian.net/browse/DOCK-262
@@ -157,7 +157,7 @@ public class SnakemakeWorkflowPlugin extends Plugin {
                 return Lists.newArrayList();
             }
             final Set<String> filenameSet = Sets.newHashSet(filennamesInDir);
-            return filenameSet.stream().map(s ->  (folderToCheck == null ? "" : folderToCheck + "/") + s).toList();
+            return filenameSet.stream().map(s ->  (folderToCheck == null ? "/" : folderToCheck + "/") + s).toList();
         }
 
         @Override

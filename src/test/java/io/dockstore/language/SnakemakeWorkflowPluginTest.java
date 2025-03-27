@@ -40,7 +40,7 @@ public class SnakemakeWorkflowPluginTest {
 
         assertFalse(fileMap.isEmpty());
         assertEquals(fileMap.containsKey(SNAKEMAKE_WORKFLOW_CATALOG_YML), isCatalogPresent);
-        assertTrue(fileMap.containsKey("README.md"));
+        assertTrue(fileMap.containsKey("/README.md"));
         return plugin.validateWorkflowSet(initialPath, contents, fileMap);
     }
 
@@ -61,12 +61,12 @@ public class SnakemakeWorkflowPluginTest {
             plugin.indexWorkflowFiles(initialPath, contents, reader);
 
         assertFalse(fileMap.isEmpty());
-        assertTrue(fileMap.containsKey("workflow/rules/align.smk"));
+        assertTrue(fileMap.containsKey("/workflow/rules/align.smk"));
         // TODO recursion, may need to update the plugin handler in dockstore itself
         // assertTrue(fileMap.containsKey(".test/config_basic/config.yaml"));
-        assertTrue(fileMap.containsKey("LICENSE"));
-        assertTrue(fileMap.get("LICENSE").content().contains("The above copyright notice and this permission notice shall be included in all"));
-        assertTrue(fileMap.get("workflow/rules/align.smk").content().contains("3.5.3/bio/star/align"));
+        assertTrue(fileMap.containsKey("/LICENSE"));
+        assertTrue(fileMap.get("/LICENSE").content().contains("The above copyright notice and this permission notice shall be included in all"));
+        assertTrue(fileMap.get("/workflow/rules/align.smk").content().contains("3.5.3/bio/star/align"));
         assertTrue(plugin.validateWorkflowSet(initialPath, contents,fileMap).isValid());
     }
 
