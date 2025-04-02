@@ -1,0 +1,5 @@
+# this wasn't actually in the repo, looks like registry catalog requires Snakefile to be in a workkflow folder
+usage:
+  software-stack-deployment:
+    conda: true 
+  report: true
