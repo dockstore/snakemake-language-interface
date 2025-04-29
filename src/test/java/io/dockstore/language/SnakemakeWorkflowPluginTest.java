@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 
 import com.google.common.io.Resources;
 import io.dockstore.common.VersionTypeValidation;
+import io.dockstore.language.MinimalLanguageInterface.FileMetadata;
+import io.dockstore.language.MinimalLanguageInterface.GenericFileType;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -68,6 +70,28 @@ public class SnakemakeWorkflowPluginTest {
         assertTrue(fileMap.get("/LICENSE").content().contains("The above copyright notice and this permission notice shall be included in all"));
         assertTrue(fileMap.get("/workflow/rules/align.smk").content().contains("3.5.3/bio/star/align"));
         assertTrue(plugin.validateWorkflowSet(initialPath, contents,fileMap).isValid());
+    }
+
+    private static Map<String, FileMetadata> createDummyFileMap(String initialPath) {
+        return Map.of(
+            initialPath, new FileMetadata("dummy snakefile content", GenericFileType.IMPORTED_DESCRIPTOR, "1.0"),
+            SnakemakeWorkflowPlugin.SNAKEMAKE_WORKFLOW_CATALOG_YML, new FileMetadata("dummy workflow catalog content", GenericFileType.IMPORTED_DESCRIPTOR, "1.0")
+        );
+    }
+
+    @Test
+    public void testWorkflowPrimaryDescriptorMustBeSnakefile() {
+        final SnakemakeWorkflowPlugin.SnakemakeWorkflowPluginImpl plugin =
+            new SnakemakeWorkflowPlugin.SnakemakeWorkflowPluginImpl();
+        for (String validPath: List.of("/Snakefile", "/workflow/Snakefile", "/snakefile", "/workflow/snakefile")) {
+            VersionTypeValidation validation = plugin.validateWorkflowSet(validPath, "", createDummyFileMap(validPath));
+            assertTrue(validation.isValid());
+        }
+        for (String invalidPath: List.of("/workflow.wdl", "/data.txt")) {
+            VersionTypeValidation validation = plugin.validateWorkflowSet(invalidPath, "", createDummyFileMap(invalidPath));
+            assertFalse(validation.isValid());
+            assertEquals(validation.getMessage().get(invalidPath), SnakemakeWorkflowPlugin.INVALID_INITIAL_PATH_MESSAGE);
+        }
     }
 
     abstract static class URLFileReader implements MinimalLanguageInterface.FileReader {
