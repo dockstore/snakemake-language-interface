@@ -40,6 +40,7 @@ public class SnakemakeWorkflowPlugin extends Plugin {
 
     public static final Logger LOG = LoggerFactory.getLogger(SnakemakeWorkflowPlugin.class);
     public static final String SNAKEMAKE_WORKFLOW_CATALOG_YML = "/.snakemake-workflow-catalog.yml";
+    public static final String INVALID_INITIAL_PATH_MESSAGE = "the primary descriptor path must be the Snakefile";
 
 
     /**
@@ -63,6 +64,10 @@ public class SnakemakeWorkflowPlugin extends Plugin {
 
         @Override
         public VersionTypeValidation validateWorkflowSet(String initialPath, String contents, Map<String, FileMetadata> indexedFiles) {
+            // if the initial path doesn't point at the Snakefile, the version is invalid
+            if (!initialPathPattern().matcher(initialPath).matches()) {
+                return new VersionTypeValidation(false, Map.of(initialPath, INVALID_INITIAL_PATH_MESSAGE));
+            }
             VersionTypeValidation validation = new VersionTypeValidation(indexedFiles.containsKey(SNAKEMAKE_WORKFLOW_CATALOG_YML), new HashMap<>());
             // TODO hook up some real validation
             return validation;
@@ -86,7 +91,7 @@ public class SnakemakeWorkflowPlugin extends Plugin {
          */
         @Override
         public Pattern initialPathPattern() {
-            return Pattern.compile("workflow/Snakefile");
+            return Pattern.compile("(/.*)?/[Ss]nakefile");
         }
 
         @Override
