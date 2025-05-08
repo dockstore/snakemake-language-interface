@@ -41,6 +41,7 @@ public class SnakemakeWorkflowPlugin extends Plugin {
     public static final Logger LOG = LoggerFactory.getLogger(SnakemakeWorkflowPlugin.class);
     public static final String SNAKEMAKE_WORKFLOW_CATALOG_YML = "/.snakemake-workflow-catalog.yml";
     public static final String INVALID_INITIAL_PATH_MESSAGE = "the primary descriptor path must be the Snakefile";
+    public static final String MISSING_WORKFLOW_CATALOG_MESSAGE = "the Snakemake workflow catalog file is missing";
 
 
     /**
@@ -68,7 +69,7 @@ public class SnakemakeWorkflowPlugin extends Plugin {
             if (!initialPathPattern().matcher(initialPath).matches()) {
                 return new VersionTypeValidation(false, Map.of(initialPath, INVALID_INITIAL_PATH_MESSAGE));
             }
-            VersionTypeValidation validation = new VersionTypeValidation(indexedFiles.containsKey(SNAKEMAKE_WORKFLOW_CATALOG_YML), new HashMap<>());
+            VersionTypeValidation validation = new VersionTypeValidation(indexedFiles.containsKey(SNAKEMAKE_WORKFLOW_CATALOG_YML), Map.of(SNAKEMAKE_WORKFLOW_CATALOG_YML, MISSING_WORKFLOW_CATALOG_MESSAGE));
             // TODO hook up some real validation
             return validation;
         }
