@@ -10,7 +10,7 @@
 
     <properties>
         <github.url>scm:git:git@github.com:dockstore/snakemake-language-interface.git</github.url>
-        <dockstore.version>1.16.0</dockstore.version>
+        <dockstore.version>1.18.0-alpha.2</dockstore.version>
         <plugin.id>${project.artifactId}</plugin.id>
         <plugin.class>io.dockstore.language.SnakemakeWorkflowPlugin</plugin.class>
         <plugin.version>${project.version}</plugin.version>
